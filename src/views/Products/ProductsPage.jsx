@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Table } from 'react-bootstrap';
+import { Table, Pagination } from 'react-bootstrap';
 import dateformat from 'dateformat';
 
 class ProductsPage extends Component {
@@ -22,16 +22,57 @@ class ProductsPage extends Component {
                 filters: [],
                 page: {
                     currentPage: 1,
-                    pageSize: 20
+                    pageSize: 10
                 }
             }
         }
+
+
     }
 
     componentWillReceiveProps(nextProps) {
         this.setState({
             products: nextProps.products
         });
+    }
+
+    getTotalPages() {
+        return Math.floor(this.getProductListFilteredAndSorted().length / this.state.query.page.pageSize)
+    }
+
+    changePage(pageNumber) {
+        this.setState({
+            query: {
+                ...this.state.query,
+                page: {
+                    ...this.state.query.page,
+                    currentPage: pageNumber
+                }
+            }
+        })
+    }
+
+    getProductListFilteredAndSorted() {
+        if (this.state.products && this.state.products.list) {
+            var products_list = this.state.products.list;
+            if (this.state.query.filters.length > 0) {
+                products_list = products_list.filter(product => {
+                    var include = true;
+                    for (var filter in this.state.query.filters) {
+                        include &= filter.values.indexOf(product[filter.key]) !== -1;
+                    }
+                    return true;
+                });
+            }
+            if (this.state.query.sort.id !== "") {
+                products_list.sort((p1, p2) => {
+                    return (this.state.query.sort.direction === "ASC") ? p1[this.state.query.sort.column] - p2[this.state.query.sort.column] : p2[this.state.query.sort.column] - p1[this.state.query.sort.column];
+                })
+            }
+            return products_list;
+        } else {
+            return [];
+        }
     }
 
     getProductListFilteredSortedAndPaginated() {
@@ -41,25 +82,53 @@ class ProductsPage extends Component {
                 products_list = products_list.filter(product => {
                     var include = true;
                     for (var filter in this.state.query.filters) {
-                        include &= filter.values.indexOf(product[filter.key]) != -1;
+                        include &= filter.values.indexOf(product[filter.key]) !== -1;
                     }
                     return true;
                 });
             }
-            if (this.state.query.sort.id != "") {
+            if (this.state.query.sort.id !== "") {
                 products_list.sort((p1, p2) => {
-                    return (this.state.query.sort.direction == "ASC") ? p1[this.state.query.sort.column] - p2[this.state.query.sort.column] : p2[this.state.query.sort.column] - p1[this.state.query.sort.column];
+                    return (this.state.query.sort.direction === "ASC") ? p1[this.state.query.sort.column] - p2[this.state.query.sort.column] : p2[this.state.query.sort.column] - p1[this.state.query.sort.column];
                 })
             }
             if (products_list.length > this.state.query.page.pageSize) {
                 products_list = products_list.filter((product, index) => {
-                    return Math.floor(index / this.state.query.page.pageSize) == this.state.query.page.currentPage - 1;
+                    return Math.floor(index / this.state.query.page.pageSize) === this.state.query.page.currentPage - 1;
                 })
             }
             return products_list;
         } else {
             return [];
         }
+    }
+
+    getPagination() {
+        return (
+            <Pagination>
+                <Pagination.First disabled={this.state.query.page.currentPage === 1} 
+                    onClick={ () => this.changePage(1) } />
+                <Pagination.Prev disabled={this.state.query.page.currentPage === 1} 
+                    onClick={ () => this.changePage(this.state.query.page.currentPage - 1) } />
+                { (this.state.query.page.currentPage > 2) ? <Pagination.Ellipsis disabled /> : null }
+                { 
+                    (this.state.query.page.currentPage > 1) ? 
+                        <Pagination.Item onClick={ () => this.changePage(this.state.query.page.currentPage - 1) }>{ this.state.query.page.currentPage - 1 }</Pagination.Item> : 
+                        null 
+                }
+                <Pagination.Item active>{ this.state.query.page.currentPage }</Pagination.Item>
+                { 
+                    (this.state.query.page.currentPage < this.getTotalPages() - 1) ? 
+                        <Pagination.Item onClick={ () => this.changePage(this.state.query.page.currentPage + 1) }>{ this.state.query.page.currentPage + 1 }</Pagination.Item> : 
+                        null 
+                }
+                { (this.state.query.page.currentPage < this.getTotalPages() - 2) ? <Pagination.Ellipsis disabled /> : null }
+                <Pagination.Next disabled={this.state.query.page.currentPage === this.getTotalPages()} 
+                    onClick={ () => this.changePage(this.state.query.page.currentPage + 1) } />
+                <Pagination.Last disabled={this.state.query.page.currentPage === this.getTotalPages()} 
+                    onClick={ () => this.changePage(this.getTotalPages()) } />
+            </Pagination>
+        )
     }
 
     getProductsTable() {
@@ -76,6 +145,13 @@ class ProductsPage extends Component {
                 <tbody>
                     { this.getProductTRs() }
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <th colSpan={4}>
+                            { this.getPagination() }
+                        </th>
+                    </tr>
+                </tfoot>
             </Table>
         )
     }

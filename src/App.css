@@ -58,3 +58,44 @@ pre code {
   }
 }
 
+.center {
+    text-align: center !important;
+    align-content: center !important;
+}
+
+.right {
+    text-align: right !important;
+    align-content: right !important;
+}
+
+.pagination {
+    margin-bottom: 0;
+}
+
+tr.clickable th {
+    cursor: pointer !important;
+}
+
+tr.clickable th:hover {
+    background: #eee;
+}
+
+.loading-page {
+    height: 750px;
+    vertical-align: middle;
+    text-align: center;
+    align-content: center;
+    padding-top: 200px;
+}
+
+.mb-3 {
+    margin-bottom: 0px !important;
+}
+
+.form-group {
+    margin-bottom: 0 !important;
+}
+
+.filter-table tbody th, .filter-table tbody td {
+    border: 0;
+}

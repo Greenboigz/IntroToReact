@@ -1,5 +1,8 @@
 import * as fs from 'fs-web';
-import { initialize_product } from './helper';
+import { initialize_product, initialize_purchase, EXPERIMENT_START_DATE, 
+    MS_PER_SEC, SEC_PER_MIN, MIN_PER_HOUR, HOURS_PER_DAY } from './helper';
+
+const A_DAY = MS_PER_SEC * SEC_PER_MIN * MIN_PER_HOUR * HOURS_PER_DAY;
 
 const FRUITS = [
     "apple",
@@ -85,25 +88,57 @@ const FRUITS = [
     "watermelon"
 ];
 
+function load_products() {
+    return FRUITS.map((item, index) => initialize_product(index, item));
+}
+
+/**
+ * Randomly choose an item out of a list
+ * @param {[]} aList 
+ */
+function choose_random(aList) {
+    return aList[Math.floor(Math.random() * aList.length)];
+}
+
+function load_purchases() {
+    var purchases = [];
+    var today = EXPERIMENT_START_DATE;
+    while (today < Date.now()) {
+        for (var p = 0; p < 5000; p++) {
+            var product = choose_random(PRODUCTS);
+            if (product.createdDate > today) {
+                purchases.push(
+                    initialize_purchase(
+                        product, 
+                        new Date(today + Math.random() * A_DAY)
+                    )
+                );
+            }
+        }
+        today += A_DAY;
+    }
+    return purchases;
+}
+
+const PRODUCTS = load_products();
+const PURCHASES = load_purchases();
+
 /**
  * Dispatches loading products from the products_file
- * @param {function(action)} dispatch 
- * @param {function} onSuccess 
+ * @param {function(action)} dispatch
+ * @param {[]} products
  */
-export function LoadProductsDispatcher(dispatch, onSuccess) {
+export function LoadProductsDispatcher(dispatch) {
     const action = {
         type: 'LOAD_PRODUCTS',
         payload: {}
     };
-    console.log("Loading");
     setTimeout(() => {
         const error = false;
-        console.log("Loaded");
         if (error) {
             dispatch(LoadProductsFailure(error));
         } else {
-            var products = FRUITS.map((item, index) => initialize_product(index, item));
-            dispatch(LoadProductsSuccess(products));
+            dispatch(LoadProductsSuccess(PRODUCTS));
         }
     }, 2000);
 
@@ -120,6 +155,40 @@ function LoadProductsSuccess(products) {
 function LoadProductsFailure(error) {
     return {
         type: 'LOAD_PRODUCTS_FAILURE',
+        payload: { error }
+    }
+}
+
+/**
+ * Dispatches loading purchases from the purchases_file
+ * @param {function(action)} dispatch
+ */
+export function LoadPurchasesDispatcher(dispatch) {
+    const action = {
+        type: 'LOAD_PURCHASES',
+        payload: {}
+    };
+    setTimeout(() => {
+        const error = false;
+        if (error) {
+            dispatch(LoadPurchasesFailure(error));
+        } else {
+            dispatch(LoadPurchasesSuccess(PURCHASES));
+        }
+    }, 2500);
+    return dispatch(action);
+}
+
+function LoadPurchasesSuccess(purchases) {
+    return {
+        type: 'LOAD_PURCHASES_SUCCESS',
+        payload: { purchases }
+    }
+}
+
+function LoadPurchasesFailure(error) {
+    return {
+        type: 'LOAD_PURCHASES_FAILURE',
         payload: { error }
     }
 }

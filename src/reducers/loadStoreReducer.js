@@ -1,6 +1,6 @@
 const INITIAL_STATE = {
     products: [],
-    trades: []
+    purchases: []
 }
 
 export default (state = INITIAL_STATE, action) => {
@@ -30,6 +30,36 @@ export default (state = INITIAL_STATE, action) => {
             result = {
                 ...state,
                 products: {
+                    loading: false,
+                    error: action.payload.error,
+                    list: []
+                }
+            };
+            break;
+        case 'LOAD_PURCHASES':
+            result = {
+                ...state,
+                purchases: {
+                    loading: true,
+                    error: null,
+                    list: []
+                }
+            };
+            break;
+        case 'LOAD_PURCHASES_SUCCESS':
+            result = {
+                ...state,
+                purchases: {
+                    loading: false,
+                    error: null,
+                    list: action.payload.purchases
+                }
+            };
+            break;
+        case 'LOAD_PURCHASES_FAILURE':
+            result = {
+                ...state,
+                purchases: {
                     loading: false,
                     error: action.payload.error,
                     list: []

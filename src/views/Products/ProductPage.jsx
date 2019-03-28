@@ -4,9 +4,9 @@ import { Table, Pagination } from 'react-bootstrap';
 import icons from 'glyphicons';
 import dateformat from 'dateformat';
 import ClipLoader from 'react-spinners/ClipLoader';
-import ProductsFilter from './ProductsFilter';
+import PurchasesFilter from '../purchases/PurchasesFilter';
 
-class ProductsPage extends Component {
+class ProductPage extends Component {
 
     constructor(props) {
         super(props);
@@ -14,11 +14,12 @@ class ProductsPage extends Component {
         this.handleFilter = this.handleFilter.bind(this);
 
         this.state = {
-            products: props.products || {
+            purchases: props.purchases || {
                 loading: false,
                 list: [],
                 error: false
             },
+            product: { },
             query: {
                 sort: {
                     column: "id",
@@ -34,13 +35,21 @@ class ProductsPage extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        this.setState({
-            products: nextProps.products
-        });
+        if (nextProps.products && nextProps.purchases) {
+            const product = nextProps.products.list.find(product => product.id == parseInt(nextProps.match.params.id));
+            const purchases = nextProps.purchases.list.filter(purchase => purchase.productId == parseInt(nextProps.match.params.id));
+            this.setState({
+                purchases: {
+                    ...nextProps.purchases,
+                    purchases
+                },
+                product
+            });
+        }
     }
 
     getTotalPages() {
-        return Math.ceil(this.getProductListFilteredAndSorted().length / this.state.query.page.pageSize)
+        return Math.ceil(this.getPurchaseListFilteredAndSorted().length / this.state.query.page.pageSize)
     }
 
     changePage(pageNumber) {
@@ -102,34 +111,34 @@ class ProductsPage extends Component {
         }
     }
 
-    getProductListFilteredAndSorted() {
-        if (this.state.products && this.state.products.list) {
-            var products_list = this.state.products.list;
+    getPurchaseListFilteredAndSorted() {
+        if (this.state.purchases && this.state.purchases.list) {
+            var purchases_list = this.state.purchases.list;
             if (this.state.query.filters.length > 0) {
-                products_list = products_list.filter(product => {
+                purchases_list = purchases_list.filter(purchase => {
                     var include = true;
-                    this.state.query.filters.forEach(filter => include &= filter(product));
+                    this.state.query.filters.forEach(filter => include &= filter(purchase));
                     return include;
                 });
             }
             if (this.state.query.sort.column !== "") {
-                products_list.sort((p1, p2) => this.compareItems(p1, p2));
+                purchases_list.sort((p1, p2) => this.compareItems(p1, p2));
             }
-            return products_list;
+            return purchases_list;
         } else {
             return [];
         }
     }
 
-    getProductListFilteredSortedAndPaginated() {
-        if (this.state.products && this.state.products.list) {
-            var products_list = this.getProductListFilteredAndSorted();
-            if (products_list.length > this.state.query.page.pageSize) {
-                products_list = products_list.filter((product, index) => {
+    getPurchaseListFilteredSortedAndPaginated() {
+        if (this.state.purchases && this.state.purchases.list) {
+            var purchases_list = this.getPurchaseListFilteredAndSorted();
+            if (purchases_list.length > this.state.query.page.pageSize) {
+                purchases_list = purchases_list.filter((purchase, index) => {
                     return Math.floor(index / this.state.query.page.pageSize) === this.state.query.page.currentPage - 1;
                 })
             }
-            return products_list;
+            return purchases_list;
         } else {
             return [];
         }
@@ -169,19 +178,19 @@ class ProductsPage extends Component {
         }
     }
 
-    getProductsTable() {
+    getPurchasesTable() {
         return (
             <Table striped bordered hover>
                 <thead>
                     <tr className="clickable">
                         <th onClick={ () => this.toggleSort("id") }># { this.getArrow("id") }</th>
-                        <th onClick={ () => this.toggleSort("name") }>Product Name { this.getArrow("name") }</th>
-                        <th onClick={ () => this.toggleSort("value") }>Current Value { this.getArrow("value") }</th>
-                        <th onClick={ () => this.toggleSort("createdDate") }>Created Date { this.getArrow("createdDate") }</th>
+                        <th onClick={ () => this.toggleSort("quantity") }>Quantity { this.getArrow("quantity") }</th>
+                        <th onClick={ () => this.toggleSort("purchaseCost") }>Purchase Cost { this.getArrow("purchaseCost") }</th>
+                        <th onClick={ () => this.toggleSort("purchaseDate") }>Purchase Date { this.getArrow("purchaseDate") }</th>
                     </tr>
                 </thead>
                 <tbody>
-                    { this.getProductTRs() }
+                    { this.getPurchaseTRs() }
                 </tbody>
                 <tfoot>
                     <tr>
@@ -194,14 +203,14 @@ class ProductsPage extends Component {
         )
     }
 
-    getProductTRs() {
-        return this.getProductListFilteredSortedAndPaginated().map((product) => {
+    getPurchaseTRs() {
+        return this.getPurchaseListFilteredSortedAndPaginated().map((purchase) => {
             return (
-                <tr key={ product.id }>
-                    <td>{ product.id }</td>
-                    <td>{ product.name }</td>
-                    <td>${ Number(product.value).toFixed(2) }/lb</td>
-                    <td>{ dateformat(product.createdDate, "dddd, mmmm dS, yyyy, h:MM:ss TT") }</td>
+                <tr key={ purchase.id }>
+                    <td>{ purchase.id }</td>
+                    <td>{ purchase.quantity } lbs</td>
+                    <td>${ Number(purchase.purchaseCost).toFixed(2) }</td>
+                    <td>{ dateformat(purchase.purchaseDate, "dddd, mmmm dS, yyyy, h:MM:ss TT") }</td>
                 </tr>
             );
         });
@@ -211,7 +220,7 @@ class ProductsPage extends Component {
         return (
             <div className="loading-page">
                 <h2>Loading</h2>
-                <ClipLoader sizeUnit={"px"} size={150} color={"#123abc"} loading={this.state.products.loading} />
+                <ClipLoader sizeUnit={"px"} size={150} color={"#123abc"} loading={this.state.purchases.loading} />
             </div>
         )
     }
@@ -227,17 +236,34 @@ class ProductsPage extends Component {
 
     render() {
         return <div className="main">
-            <h1>Products</h1>
-            <ProductsFilter onSubmit={ this.handleFilter } />
-            { (this.state.products.loading) ? this.getLoadingMessage() : this.getProductsTable() }
+            <h1>Purchase History</h1>
+            <PurchasesFilter onSubmit={ this.handleFilter } />
+            { (this.state.purchases.loading) ? this.getLoadingMessage() : this.getPurchasesTable() }
         </div>
     }
 
 }
+
 function mapStateToProps(state) {
-    return {
-        products: state.loadStoreReducer.products
-    };
+    if (state.loadStoreReducer.purchases && state.loadStoreReducer.purchases.list) {
+        const getProduct = id => state.loadStoreReducer.products.list.find(product => product.id === id);
+        const purchase_list = state.loadStoreReducer.purchases.list.map(purchase => {
+            const product = getProduct(purchase.productId);
+            return {
+                ...purchase,
+                purchaseCost: product.value * purchase.quantity
+            }
+        });
+        return {
+            purchases: {
+                ...state.loadStoreReducer.purchases,
+                list: purchase_list
+            },
+            products: state.loadStoreReducer.products
+        };
+    } else {
+        return {};
+    }
 }
 
 function mapDispatchToProps(dispatch) {
@@ -246,4 +272,4 @@ function mapDispatchToProps(dispatch) {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ProductsPage);
+export default connect(mapStateToProps, mapDispatchToProps)(ProductPage);

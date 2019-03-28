@@ -4,11 +4,12 @@ import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 
 import logo from './logo.svg';
-import { LoadProductsDispatcher } from './actions/loadStoreActions';
+import { LoadProductsDispatcher, LoadPurchasesDispatcher } from './actions/loadStoreActions';
 import Home from './views/Home';
 import WebHistoryPage from './views/WebHistoryPage';
-import ProductsPage from './views/Products/ProductsPage';
-import TradesPage from './views/TradesPage';
+import ProductsPage from './views/products/ProductsPage';
+import ProductPage from './views/products/ProductPage';
+import PurchasesPage from './views/purchases/PurchasesPage';
 import ReactPage from './views/ReactPage';
 import ReduxPage from './views/ReduxPage';
 
@@ -25,7 +26,7 @@ class App extends Component {
     }
 
     componentWillMount() {
-        this.props.initProducts();
+        this.props.initStore();
     }
 
     componentWillReceiveProps(nextProps) {
@@ -52,8 +53,8 @@ class App extends Component {
                                 <Link className="dropdown-item" to="/faq/redux">Redux</Link>
                             </NavDropdown>
                             <NavDropdown title="Demo" id="basic-nav-dropdown">
-                                <Link className="dropdown-item" to="/products">Products</Link>
-                                <Link className="dropdown-item" to="/trades">Trades</Link>
+                                <Link className="dropdown-item" to="/demo/products">Products</Link>
+                                <Link className="dropdown-item" to="/demo/purchases">Purchase History</Link>
                             </NavDropdown>
                         </Nav>
                     </Navbar>
@@ -62,8 +63,9 @@ class App extends Component {
                         <Route exact path="/faq/history" component={WebHistoryPage} />
                         <Route exact path="/faq/react" component={ReactPage} />
                         <Route exact path="/faq/redux" component={ReduxPage} />
-                        <Route path="/products" component={ProductsPage} />
-                        <Route path="/trade" component={TradesPage} />
+                        <Route exact path="/demo/products" component={ProductsPage} />
+                        <Route path="/demo/products/:id" component={ProductPage} />
+                        <Route exact path="/demo/purchases" component={PurchasesPage} />
                     </Switch>
                 </Router>
             </div>
@@ -79,7 +81,10 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        initProducts: () => LoadProductsDispatcher(dispatch)
+        initStore: () => { 
+            LoadProductsDispatcher(dispatch);
+            LoadPurchasesDispatcher(dispatch);
+        }
     }
 }
 

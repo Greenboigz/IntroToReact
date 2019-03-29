@@ -8,7 +8,7 @@ import { LoadProductsDispatcher, LoadPurchasesDispatcher } from './actions/loadS
 import Home from './views/Home';
 import WebHistoryPage from './views/WebHistoryPage';
 import ProductsPage from './views/products/ProductsPage';
-import ProductPage from './views/products/ProductPage';
+import ProductPage from './views/product/ProductPage';
 import PurchasesPage from './views/purchases/PurchasesPage';
 import ReactPage from './views/ReactPage';
 import ReduxPage from './views/ReduxPage';

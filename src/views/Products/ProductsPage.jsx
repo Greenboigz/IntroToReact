@@ -5,6 +5,7 @@ import icons from 'glyphicons';
 import dateformat from 'dateformat';
 import ClipLoader from 'react-spinners/ClipLoader';
 import ProductsFilter from './ProductsFilter';
+import { withRouter } from 'react-router-dom';
 
 class ProductsPage extends Component {
 
@@ -197,7 +198,7 @@ class ProductsPage extends Component {
     getProductTRs() {
         return this.getProductListFilteredSortedAndPaginated().map((product) => {
             return (
-                <tr key={ product.id }>
+                <tr key={ product.id } onClick={ () => { this.props.history.push({ pathname: "/demo/products/" + product.id }) } }>
                     <td>{ product.id }</td>
                     <td>{ product.name }</td>
                     <td>${ Number(product.value).toFixed(2) }/lb</td>
@@ -246,4 +247,4 @@ function mapDispatchToProps(dispatch) {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ProductsPage);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ProductsPage));

@@ -4,22 +4,29 @@ import { Table, Pagination } from 'react-bootstrap';
 import icons from 'glyphicons';
 import dateformat from 'dateformat';
 import ClipLoader from 'react-spinners/ClipLoader';
-import PurchasesFilter from '../purchases/PurchasesFilter';
+import PurchasesFilter from './PurchasesFilter';
 
-class ProductPage extends Component {
+class PurchasesTable extends Component {
 
     constructor(props) {
         super(props);
 
         this.handleFilter = this.handleFilter.bind(this);
 
+        var product = {};
+        var purchases = props.purchases || {
+            loading: true,
+            error: null,
+            list: []
+        };
+        if (props.products) 
+            product = this.props.products.list.find(product => product.id === parseInt(this.props.match.params.id));
+        if (props.purchases)
+            purchases.list = this.props.purchases.list.filter(purchase => purchase.productId === product.id);
+
         this.state = {
-            purchases: props.purchases || {
-                loading: false,
-                list: [],
-                error: false
-            },
-            product: { },
+            purchases,
+            product,
             query: {
                 sort: {
                     column: "id",
@@ -36,12 +43,12 @@ class ProductPage extends Component {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.products && nextProps.purchases) {
-            const product = nextProps.products.list.find(product => product.id == parseInt(nextProps.match.params.id));
-            const purchases = nextProps.purchases.list.filter(purchase => purchase.productId == parseInt(nextProps.match.params.id));
+            const product = nextProps.products.list.find(product => product.id === parseInt(nextProps.match.params.id));
+            const purchases_list = nextProps.purchases.list.filter(purchase => purchase.productId === product.id);
             this.setState({
                 purchases: {
                     ...nextProps.purchases,
-                    purchases
+                    list: purchases_list
                 },
                 product
             });
@@ -235,8 +242,7 @@ class ProductPage extends Component {
     }
 
     render() {
-        return <div className="main">
-            <h1>Purchase History</h1>
+        return <div>
             <PurchasesFilter onSubmit={ this.handleFilter } />
             { (this.state.purchases.loading) ? this.getLoadingMessage() : this.getPurchasesTable() }
         </div>
@@ -272,4 +278,4 @@ function mapDispatchToProps(dispatch) {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ProductPage);
+export default connect(mapStateToProps, mapDispatchToProps)(PurchasesTable);

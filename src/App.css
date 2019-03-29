@@ -99,3 +99,7 @@ tr.clickable th:hover {
 .filter-table tbody th, .filter-table tbody td {
     border: 0;
 }
+
+.product-page-content {
+    padding-top: 20px;
+}

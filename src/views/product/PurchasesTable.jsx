@@ -12,21 +12,14 @@ class PurchasesTable extends Component {
         super(props);
 
         this.handleFilter = this.handleFilter.bind(this);
-
-        var product = {};
-        var purchases = props.purchases || {
-            loading: true,
-            error: null,
-            list: []
-        };
-        if (props.products) 
-            product = this.props.products.list.find(product => product.id === parseInt(this.props.match.params.id));
-        if (props.purchases)
-            purchases.list = this.props.purchases.list.filter(purchase => purchase.productId === product.id);
+        this.toggleSortId = () => this.toggleSort("id");
+        this.toggleSortQuantity = () => this.toggleSort("quantity");
+        this.toggleSortPurchaseCost = () => this.toggleSort("purchaseCost");
+        this.toggleSortPurchaseDate = () => this.toggleSort("purchaseDate");
 
         this.state = {
-            purchases,
-            product,
+            purchases: props.purchases,
+            product: props.product,
             query: {
                 sort: {
                     column: "id",
@@ -43,14 +36,9 @@ class PurchasesTable extends Component {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.products && nextProps.purchases) {
-            const product = nextProps.products.list.find(product => product.id === parseInt(nextProps.match.params.id));
-            const purchases_list = nextProps.purchases.list.filter(purchase => purchase.productId === product.id);
             this.setState({
-                purchases: {
-                    ...nextProps.purchases,
-                    list: purchases_list
-                },
-                product
+                purchases: nextProps.products,
+                product: nextProps.product
             });
         }
     }
@@ -190,10 +178,10 @@ class PurchasesTable extends Component {
             <Table striped bordered hover>
                 <thead>
                     <tr className="clickable">
-                        <th onClick={ () => this.toggleSort("id") }># { this.getArrow("id") }</th>
-                        <th onClick={ () => this.toggleSort("quantity") }>Quantity { this.getArrow("quantity") }</th>
-                        <th onClick={ () => this.toggleSort("purchaseCost") }>Purchase Cost { this.getArrow("purchaseCost") }</th>
-                        <th onClick={ () => this.toggleSort("purchaseDate") }>Purchase Date { this.getArrow("purchaseDate") }</th>
+                        <th onClick={ this.toggleSortId }># { this.getArrow("id") }</th>
+                        <th onClick={ this.toggleSortQuantity }>Quantity { this.getArrow("quantity") }</th>
+                        <th onClick={ this.toggleSortPurchaseCost }>Purchase Cost { this.getArrow("purchaseCost") }</th>
+                        <th onClick={ this.toggleSortPurchaseDate }>Purchase Date { this.getArrow("purchaseDate") }</th>
                     </tr>
                 </thead>
                 <tbody>

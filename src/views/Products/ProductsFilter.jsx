@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Pagination, InputGroup, FormControl, Button, Form } from 'react-bootstrap';
+import { Table, InputGroup, Button, Form } from 'react-bootstrap';
 
 class ProductsPage extends Component {
 

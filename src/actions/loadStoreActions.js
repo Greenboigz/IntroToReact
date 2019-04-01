@@ -1,8 +1,5 @@
-import * as fs from 'fs-web';
-import { initialize_product, initialize_purchase, EXPERIMENT_START_DATE, 
-    MS_PER_SEC, SEC_PER_MIN, MIN_PER_HOUR, HOURS_PER_DAY } from './helper';
+import { initialize_product, initialize_purchase, EXPERIMENT_START_DATE, A_DAY } from '../helpers/helper';
 
-const A_DAY = MS_PER_SEC * SEC_PER_MIN * MIN_PER_HOUR * HOURS_PER_DAY;
 
 const FRUITS = [
     "apple",

@@ -4,6 +4,8 @@ import { Table, Nav } from 'react-bootstrap';
 import PurchasesTable from './PurchasesTable';
 import dateformat from 'dateformat';
 import ClipLoader from 'react-spinners/ClipLoader';
+import { LineChart } from 'react-d3-components';
+import { EXPERIMENT_START_DATE, A_DAY } from '../../helpers/helper';
 
 class ProductPage extends Component {
 
@@ -18,8 +20,8 @@ class ProductPage extends Component {
         };
 
         if (this.props.products && this.props.purchases) {
-            product = this.props.products.list.find(product => product.id == parseInt(this.props.match.params.id));
-            purchases = this.props.purchases.list.filter(purchase => purchase.productId == parseInt(this.props.match.params.id));
+            product = this.props.products.list.find(product => product.id === parseInt(this.props.match.params.id));
+            purchases = this.props.purchases.list.filter(purchase => purchase.productId === parseInt(this.props.match.params.id));
     
             if (product) {
                 product.quantitySold = 0;
@@ -33,27 +35,54 @@ class ProductPage extends Component {
             purchases: purchases,
             product: product,
             loading: false,
+            graphData: [],
             display: "product"
         }
 
         this.handleNavSelect = this.handleNavSelect.bind(this);
     }
 
+    generateGraphValues(purchase_list) {
+        var today = new Date(EXPERIMENT_START_DATE);
+        const values = [];
+        var total = 0;
+        const sumTodaysTotals = purchase => {
+            if (purchase.purchaseDate.getDate() === today.getDate()) {
+                total += purchase.quantity;
+            }
+        }
+        while (today < new Date()) {
+            total = 0;
+            purchase_list.forEach(sumTodaysTotals);
+            values.push({ x: today.getDate(), y: total });
+            today += A_DAY;
+        }
+        return values;
+    }
+
     componentWillReceiveProps(nextProps) {
         if (nextProps.products && nextProps.purchases) {
-            const product = nextProps.products.list.find(product => product.id == parseInt(nextProps.match.params.id));
-            const purchases = nextProps.purchases.list.filter(purchase => purchase.productId == parseInt(nextProps.match.params.id));
+            const product = nextProps.products.list.find(product => product.id === parseInt(nextProps.match.params.id));
+            const purchase_list = nextProps.purchases.list.filter(purchase => purchase.productId === parseInt(nextProps.match.params.id));
+            
             if (product) {
+                const graphData = [
+                    {
+                        label: product.name,
+                        values: this.generateGraphValues(purchase_list)
+                    }
+                ]
                 product.quantitySold = 0;
-                purchases.forEach(purchase => {
+                purchase_list.forEach(purchase => {
                     product.quantitySold += purchase.quantity
                 });
                 this.setState({
                     purchases: {
                         ...nextProps.purchases,
-                        purchases
+                        purchases: purchase_list
                     },
                     product,
+                    graphData,
                     loading: nextProps.purchases.loading || nextProps.products.loading
                 });
             }
@@ -96,7 +125,15 @@ class ProductPage extends Component {
     }
 
     getPurchasesGraph() {
-        return <div></div>
+        // return (
+        //     <div>
+        //         <LineChart 
+        //             data={this.state.graphData}
+        //             width={800}
+        //             height={400}
+        //             margin={{top: 10, bottom: 50, left: 50, right: 10}} />
+        //     </div>
+        // );
     }
 
     getLoadingMessage() {
@@ -112,7 +149,7 @@ class ProductPage extends Component {
         if (this.state.loading) {
             return this.getLoadingMessage();
         } else if (this.state.display === "purchases") {
-            return <PurchasesTable match={this.props.match} />
+            return <PurchasesTable product={ this.state.product } purchases={this.state.purchases} />
         } else {
             return (
                 <div>

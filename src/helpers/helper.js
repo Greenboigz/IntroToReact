@@ -5,6 +5,7 @@ export const HOURS_PER_DAY = 24;
 export const NUMBER_OF_DAYS = 120;
 export const EXPERIMENT_DURATION = MS_PER_SEC * SEC_PER_MIN * MIN_PER_HOUR * HOURS_PER_DAY * NUMBER_OF_DAYS;
 export const EXPERIMENT_START_DATE = Date.now() - EXPERIMENT_DURATION;
+export const A_DAY = MS_PER_SEC * SEC_PER_MIN * MIN_PER_HOUR * HOURS_PER_DAY;
 
 var transaction_id = 0;
 

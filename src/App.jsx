@@ -6,12 +6,12 @@ import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import logo from './logo.svg';
 import { LoadProductsDispatcher, LoadPurchasesDispatcher } from './actions/loadStoreActions';
 import Home from './views/Home';
-import WebHistoryPage from './views/WebHistoryPage';
+import WebHistoryPage from './views/faq/WebHistoryPage';
 import ProductsPage from './views/products/ProductsPage';
 import ProductPage from './views/product/ProductPage';
 import PurchasesPage from './views/purchases/PurchasesPage';
-import ReactPage from './views/ReactPage';
-import ReduxPage from './views/ReduxPage';
+import ReactPage from './views/faq/ReactPage';
+import ReduxPage from './views/faq/ReduxPage';
 
 import './App.css';
 
